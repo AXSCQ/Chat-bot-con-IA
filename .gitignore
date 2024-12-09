@@ -29,4 +29,5 @@ Thumbs.db
 # Temporary files
 /backend/temp/
 /backend/PDF/*
-!/backend/PDF/.gitkeep 
+!/backend/PDF/.gitkeep
+/backend/pdf_cache.json

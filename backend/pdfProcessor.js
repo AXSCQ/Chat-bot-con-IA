@@ -6,12 +6,22 @@ import path from 'path';
 const require = createRequire(import.meta.url);
 const pdfjsLib = require('pdfjs-dist');
 import 'dotenv/config';
+import { savePDFCache, getPDFCache, getAllPDFCache } from './pdfCache.js';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 async function extractImagesFromPDF(pdfPath) {
+    const pdfName = path.basename(pdfPath);
+    
+    // Verificar si existe en caché
+    const cachedContent = await getPDFCache(pdfName);
+    if (cachedContent) {
+        console.log(`Usando contenido cacheado para ${pdfName}`);
+        return cachedContent.content;
+    }
+
     try {
         const data = new Uint8Array(await fs.readFile(pdfPath));
         const loadingTask = pdfjsLib.getDocument(data);
@@ -58,6 +68,8 @@ async function extractImagesFromPDF(pdfPath) {
             await fs.remove(tempImagePath);
         }
 
+        // Guardar en caché antes de retornar
+        await savePDFCache(pdfName, extractedText);
         return extractedText;
     } catch (error) {
         console.error('Error al procesar el PDF:', error);
@@ -66,6 +78,13 @@ async function extractImagesFromPDF(pdfPath) {
 }
 
 async function readAllPDFs() {
+    // Intentar usar el caché primero
+    const cachedContent = await getAllPDFCache();
+    if (cachedContent) {
+        console.log('Usando contenido cacheado para todos los PDFs');
+        return cachedContent;
+    }
+
     const pdfFolder = './PDF';
     let allText = '';
     try {
@@ -92,11 +111,16 @@ async function answerQuestion(question, context) {
             messages: [
                 {
                     role: "system",
-                    content: "Eres un asistente que responde preguntas basadas en el contenido de documentos PDF. Si no puedes encontrar la información específica en el contexto proporcionado, indícalo claramente."
+                    content: `Eres un asistente legislativo especializado que ayuda a los diputados 
+                    de la Cámara de Diputados. Tu función es analizar y responder preguntas sobre 
+                    documentos legislativos, proyectos de ley y otros documentos parlamentarios. 
+                    Debes proporcionar respuestas precisas, formales y orientadas al contexto legislativo.
+                    Si la información no está en el contexto proporcionado, indícalo claramente y sugiere 
+                    buscar en fuentes oficiales adicionales.`
                 },
                 {
                     role: "user",
-                    content: `Contexto del PDF:\n${context}\n\nPregunta: ${question}`
+                    content: `Contexto del documento:\n${context}\n\nConsulta: ${question}`
                 }
             ],
             temperature: 0.7,
@@ -126,4 +150,4 @@ async function handleQuestion(question) {
     }
 }
 
-export { readAllPDFs, handleQuestion };
+export { readAllPDFs, handleQuestion, answerQuestion, extractImagesFromPDF };

@@ -12,15 +12,20 @@
     flex-direction: column;
     z-index: 1000;
     animation: slideIn 0.3s ease-out;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)),
+                  url('../assets/camara-fondo.jpg');
+    background-size: cover;
+    background-position: center;
 }
 
 .chat-header {
-    background: linear-gradient(135deg, #2196F3, #1976D2);
+    background: linear-gradient(135deg, #003366, #001F3F);
     color: white;
     padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 3px solid #B8C7DC;
 }
 
 .chat-header h3 {
@@ -45,20 +50,43 @@
 }
 
 .welcome-message {
-    text-align: center;
+    text-align: left;
     padding: 20px;
-    color: #666;
+    color: #333;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 15px;
 }
 
 .welcome-message h4 {
-    margin: 0 0 10px 0;
-    color: #1976D2;
+    color: #003366;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.welcome-message ul {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.welcome-message li {
+    margin: 8px 0;
+    color: #444;
+}
+
+.registration-info {
+    text-align: center;
+    color: #666;
+    margin-bottom: 20px;
+    padding: 0 20px;
+    line-height: 1.5;
 }
 
 .bot-message {
-    background-color: #f5f5f5 !important;
+    background-color: #E8F0F8 !important;
     border-radius: 12px 12px 12px 0 !important;
     margin: 8px 0;
+    border-left: 3px solid #003366 !important;
 }
 
 .user-message {
@@ -184,4 +212,31 @@
         right: 0;
         border-radius: 0;
     }
+} 
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-logo {
+    width: 40px;
+    height: auto;
+}
+
+.header-text {
+    color: white;
+}
+
+.header-subtitle {
+    font-size: 0.8rem;
+    color: #B8C7DC;
+    font-style: italic;
+}
+
+.chat-widget-logo {
+    width: 30px;
+    height: auto;
+    margin-right: 10px;
 } 
