@@ -2,17 +2,45 @@ version: '3.8'
 
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "3001:3001"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_ENV=development
     volumes:
-      - ./PDF:/app/PDF
+      - ./backend/PDF:/app/PDF
+      - ./backend/pdf_cache.json:/app/pdf_cache.json
+      - ./backend/.env:/app/.env
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - app-network
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3000:80"
+      - "8080:80"
     depends_on:
-      - backend 
+      - backend
+    restart: always
+    networks:
+      - app-network
+    volumes:
+      - widget_dist:/usr/share/nginx/html/widget
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pdf_storage:
+  cache_storage:
+  widget_dist:

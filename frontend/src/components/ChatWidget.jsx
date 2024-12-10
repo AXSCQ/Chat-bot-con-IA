@@ -4,8 +4,9 @@ import '@chatscope/chat-ui-kit-styles/dist/default/styles.min.css';
 import axios from 'axios';
 import './ChatWidget.css';
 import logoLegislatura from '../assets/logo-legislatura.png';
+import ReactDOM from 'react-dom/client';
 
-function ChatWidget() {
+function ChatWidget({ apiUrl, theme }) {
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,7 @@ function ChatWidget() {
     const handleRegistration = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:3001/api/register', registrationData);
+            const response = await axios.post(`${apiUrl}/api/register`, registrationData);
             if (response.data.success) {
                 setIsRegistered(true);
                 localStorage.setItem('chatUserRegistered', 'true');
@@ -49,7 +50,7 @@ function ChatWidget() {
                 direction: "outgoing"
             }]);
 
-            const response = await axios.post('http://localhost:3001/api/chat', {
+            const response = await axios.post(`${apiUrl}/api/chat`, {
                 question: cleanMessage
             });
 
@@ -179,4 +180,18 @@ function ChatWidget() {
     );
 }
 
+// Exportar como un widget que puede ser montado en cualquier div
+export function initChatWidget(containerId, config = {}) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        ReactDOM.createRoot(container).render(
+            <ChatWidget 
+                apiUrl={config.apiUrl || 'http://localhost:3001'} 
+                theme={config.theme || {}}
+            />
+        );
+    }
+}
+
+// Exportar también el componente para uso directo
 export default ChatWidget; 

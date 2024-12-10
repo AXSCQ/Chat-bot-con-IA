@@ -1,22 +1,32 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-const CACHE_FILE = 'pdf_cache.json';
+const CACHE_FILE = path.join(process.cwd(), 'cache_data.json');
+
+async function initCache() {
+    try {
+        if (!await fs.pathExists(CACHE_FILE)) {
+            await fs.writeJson(CACHE_FILE, {}, { spaces: 2 });
+            console.log('Cache inicializado correctamente');
+        }
+    } catch (error) {
+        console.error('Error inicializando caché:', error);
+        await fs.writeJson(CACHE_FILE, {}, { spaces: 2 });
+    }
+}
 
 async function savePDFCache(pdfName, content) {
     try {
-        let cache = {};
-        if (await fs.pathExists(CACHE_FILE)) {
-            cache = await fs.readJson(CACHE_FILE);
-        }
+        await initCache();
+        const cache = await fs.readJson(CACHE_FILE);
         
         cache[pdfName] = {
-            content,
+            content: content.toString(),
             timestamp: new Date().toISOString()
         };
         
         await fs.writeJson(CACHE_FILE, cache, { spaces: 2 });
-        console.log(`Cache actualizado para ${pdfName}`);
+        console.log(`✅ Cache actualizado para ${pdfName}`);
     } catch (error) {
         console.error('Error al guardar cache:', error);
     }
@@ -24,11 +34,9 @@ async function savePDFCache(pdfName, content) {
 
 async function getPDFCache(pdfName) {
     try {
-        if (await fs.pathExists(CACHE_FILE)) {
-            const cache = await fs.readJson(CACHE_FILE);
-            return cache[pdfName];
-        }
-        return null;
+        await initCache();
+        const cache = await fs.readJson(CACHE_FILE);
+        return cache[pdfName] || null;
     } catch (error) {
         console.error('Error al leer cache:', error);
         return null;
@@ -37,15 +45,17 @@ async function getPDFCache(pdfName) {
 
 async function getAllPDFCache() {
     try {
-        if (await fs.pathExists(CACHE_FILE)) {
-            const cache = await fs.readJson(CACHE_FILE);
-            return Object.values(cache).map(item => item.content).join('\n\n');
-        }
-        return '';
+        await initCache();
+        const cache = await fs.readJson(CACHE_FILE);
+        return Object.entries(cache)
+            .map(([name, data]) => `[${name}]\n${data.content}`)
+            .join('\n\n');
     } catch (error) {
         console.error('Error al leer todo el cache:', error);
         return '';
     }
 }
+
+initCache().catch(console.error);
 
 export { savePDFCache, getPDFCache, getAllPDFCache }; 

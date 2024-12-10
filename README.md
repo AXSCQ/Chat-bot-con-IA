@@ -21,3 +21,15 @@ Un asistente virtual que permite hacer consultas sobre documentos PDF utilizando
 ## Instalación
 
 1. Clonar el repositorio: 
+
+## Despliegue en Producción
+
+1. Configurar variables de entorno:
+
+## Despliegue del Servicio
+
+1. Clonar el repositorio:
+
+## Despliegue Rápido
+
+1. Crear archivo docker-compose.yml:

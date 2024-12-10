@@ -3,9 +3,8 @@ import ChatWidget from './components/ChatWidget'
 
 function App() {
   return (
-    <div>
-      <h1>PDF Chat Assistant</h1>
-      <ChatWidget />
+    <div style={{ height: '100vh' }}>
+      <ChatWidget apiUrl="http://localhost:3001" />
     </div>
   )
 }

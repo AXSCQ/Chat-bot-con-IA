@@ -8,6 +8,9 @@ import { initializeDatabase, registerUser, getAllUsers } from './database.js';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getAllPDFCache } from './pdfCache.js';
+import dotenv from 'dotenv';
+import { fetchAndDownloadPDFs } from './pdfDownloader.js';
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -54,6 +57,20 @@ pdfWatcher.on('unlink', async (filePath) => {
         console.error('Error al eliminar cache:', error);
     }
 });
+
+// Función para descargar y escanear PDFs automáticamente
+async function updatePDFs() {
+    try {
+        console.log('Iniciando descarga de PDFs...');
+        await fetchAndDownloadPDFs();
+        console.log('Descarga de PDFs completada');
+    } catch (error) {
+        console.error('Error al actualizar PDFs:', error);
+    }
+}
+
+// Llamar a la función de actualización al iniciar el servidor
+updatePDFs();
 
 app.post('/api/chat', async (req, res) => {
     try {
@@ -108,6 +125,11 @@ app.get('/api/users', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+// Agregar endpoint de health check
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
 });
 
 const PORT = process.env.PORT || 3001;
