@@ -3,8 +3,8 @@ import ChatWidget from './components/ChatWidget'
 
 function App() {
   return (
-    <div style={{ height: '100vh' }}>
-      <ChatWidget apiUrl="http://localhost:3001" />
+    <div className="App">
+      <ChatWidget />
     </div>
   )
 }
