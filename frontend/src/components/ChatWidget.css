@@ -170,4 +170,160 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.register-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.register-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.register-container input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.register-container button {
+    padding: 12px;
+    background: #1a5f7a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.register-container button:hover {
+    background: #086890;
+}
+
+.chat-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.laws-selector {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.laws-selector h4 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+.laws-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    min-height: 100px;
+}
+
+.law-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.law-item.selected {
+    border-color: #1a5f7a;
+    background: #f0f7ff;
+}
+
+.law-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.law-number {
+    font-weight: 600;
+    color: #1a5f7a;
+}
+
+.law-title {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.download-button {
+    color: #1a5f7a;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.download-button:hover {
+    background: #e9ecef;
+}
+
+@media (max-width: 480px) {
+    .laws-list {
+        max-height: 150px;
+    }
+}
+
+.laws-empty-state {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.laws-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #666;
+    gap: 10px;
+}
+
+.laws-loading i {
+    font-size: 20px;
+    color: #1a5f7a;
+}
+
+.retry-button {
+    display: block;
+    margin: 10px auto 0;
+    padding: 8px 16px;
+    background: #1a5f7a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.retry-button:hover {
+    background: #086890;
+}
+
+.retry-button i {
+    margin-right: 8px;
 } 
