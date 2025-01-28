@@ -260,6 +260,9 @@ const ChatWidget = () => {
                                                 <div className="law-info">
                                                     <span className="law-number">PL No {law.number}</span>
                                                     <span className="law-title">{law.title}</span>
+                                                    {law.description && (
+                                                        <span className="law-description">{law.description}</span>
+                                                    )}
                                                 </div>
                                                 {law.pdfUrl && (
                                                     <a 
