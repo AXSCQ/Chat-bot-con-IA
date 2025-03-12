@@ -12,15 +12,19 @@ import axios from 'axios';
 import './ChatWidget.css';
 import logoLegislatura from '../assets/logo-legislatura.png';
 
-// Constantes para la API
-const API_BASE_URL = 'http://localhost:8000';
-const ENDPOINTS = {
-    chat: `${API_BASE_URL}/api/chat`,
-    laws: `${API_BASE_URL}/api/laws`
-};
+// Constantes para la API - Ahora configurable
+const DEFAULT_API_BASE_URL = 'http://localhost:8000';
 
 // Componente ChatWidget
-const ChatWidget = () => {
+const ChatWidget = ({ config = {} }) => {
+    // Usar la configuración proporcionada o valores predeterminados
+    const API_BASE_URL = config.apiBaseUrl || DEFAULT_API_BASE_URL;
+    const ENDPOINTS = {
+        chat: `${API_BASE_URL}/api/chat`,
+        laws: `${API_BASE_URL}/api/laws`,
+        register: `${API_BASE_URL}/api/register`
+    };
+
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +34,8 @@ const ChatWidget = () => {
     const [selectedLaws, setSelectedLaws] = useState([]);
     const [showRegister, setShowRegister] = useState(true);
     const [registerData, setRegisterData] = useState({ name: '', email: '' });
+    const [isPdfsExpanded, setIsPdfsExpanded] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         fetchLaws();
@@ -59,8 +65,8 @@ const ChatWidget = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            // Primero intentamos registrar al usuario
-            const response = await axios.post('http://localhost:8000/api/register', registerData);
+            // Usar el endpoint configurado
+            const response = await axios.post(ENDPOINTS.register, registerData);
             const userData = response.data.user || response.data;
             setUser(userData);
             setShowRegister(false);
@@ -191,6 +197,20 @@ const ChatWidget = () => {
         }]);
     };
 
+    const togglePdfsSection = () => {
+        setIsPdfsExpanded(!isPdfsExpanded);
+    };
+
+    // Función para filtrar leyes según el término de búsqueda
+    const filteredLaws = laws.filter(law => {
+        const searchTermLower = searchTerm.toLowerCase();
+        return (
+            law.number.toLowerCase().includes(searchTermLower) ||
+            (law.title && law.title.toLowerCase().includes(searchTermLower)) ||
+            (law.description && law.description.toLowerCase().includes(searchTermLower))
+        );
+    });
+
     return (
         <>
             {!isOpen && (
@@ -243,82 +263,116 @@ const ChatWidget = () => {
                         </div>
                     ) : (
                         <div className="chat-content">
-                            <div className="laws-selector">
-                                <h4>Proyectos de Ley ({selectedLaws.length}/3 seleccionados)</h4>
-                                {isLoadingLaws ? (
-                                    <div className="laws-loading">
-                                        <i className="fas fa-spinner fa-spin"></i> Cargando proyectos...
-                                    </div>
-                                ) : laws.length > 0 ? (
-                                    <div className="laws-list">
-                                        {laws.map(law => (
-                                            <div 
-                                                key={law.number}
-                                                className={`law-item ${selectedLaws.includes(extractLawNumber(law.number)) ? 'selected' : ''}`}
-                                                onClick={() => handleLawSelection(law.number)}
-                                            >
-                                                <div className="law-info">
-                                                    <span className="law-number">PL No {law.number}</span>
-                                                    <span className="law-title">{law.title}</span>
-                                                    {law.description && (
-                                                        <span className="law-description">{law.description}</span>
-                                                    )}
-                                                </div>
-                                                {law.pdfUrl && (
-                                                    <a 
-                                                        href={law.pdfUrl} 
-                                                        className="download-button"
-                                                        onClick={e => e.stopPropagation()}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                            <div className={`laws-selector ${isPdfsExpanded ? 'expanded' : 'collapsed'}`}>
+                                <div className="laws-header" onClick={togglePdfsSection}>
+                                    <h4>Proyectos de Ley ({selectedLaws.length}/3 seleccionados)</h4>
+                                    <button className="toggle-button">
+                                        <i className={`fas fa-chevron-${isPdfsExpanded ? 'up' : 'down'}`}></i>
+                                    </button>
+                                </div>
+                                
+                                <div className="laws-content">
+                                    {isPdfsExpanded && (
+                                        <div className="search-container">
+                                            <input
+                                                type="text"
+                                                placeholder="Buscar por número, título o descripción..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="search-input"
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {isLoadingLaws ? (
+                                        <div className="laws-loading">
+                                            <i className="fas fa-spinner fa-spin"></i> Cargando proyectos...
+                                        </div>
+                                    ) : laws.length > 0 ? (
+                                        <div className="laws-list">
+                                            {filteredLaws.length > 0 ? (
+                                                filteredLaws.map(law => (
+                                                    <div 
+                                                        key={law.number}
+                                                        className={`law-item ${selectedLaws.includes(extractLawNumber(law.number)) ? 'selected' : ''}`}
+                                                        onClick={() => handleLawSelection(law.number)}
                                                     >
-                                                        <i className="fas fa-download"></i>
-                                                    </a>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="laws-empty-state">
-                                        No hay proyectos de ley disponibles en este momento.
-                                        <button 
-                                            onClick={fetchLaws} 
-                                            className="retry-button"
-                                        >
-                                            <i className="fas fa-sync-alt"></i> Reintentar
-                                        </button>
-                                    </div>
-                                )}
+                                                        <div className="law-info">
+                                                            <span className="law-number">PL No {law.number}</span>
+                                                            <span className="law-title">{law.title}</span>
+                                                            {law.description && (
+                                                                <span className="law-description">{law.description}</span>
+                                                            )}
+                                                        </div>
+                                                        {law.pdfUrl && (
+                                                            <a 
+                                                                href={`${API_BASE_URL}/api/pdf/${extractLawNumber(law.number)}`}
+                                                                className="download-button"
+                                                                onClick={e => e.stopPropagation()}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                download={`PL-No-${law.number}.pdf`}
+                                                            >
+                                                                <i className="fas fa-download"></i>
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="no-results">
+                                                    No se encontraron proyectos con "{searchTerm}". 
+                                                    <button onClick={() => setSearchTerm('')} className="clear-search">
+                                                        Limpiar búsqueda
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="laws-empty-state">
+                                            No hay proyectos de ley disponibles en este momento.
+                                            <button 
+                                                onClick={fetchLaws} 
+                                                className="retry-button"
+                                            >
+                                                <i className="fas fa-sync-alt"></i> Reintentar
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <ChatContainer>
-                                <MessageList
-                                    typingIndicator={isLoading ? <TypingIndicator content="El bot está escribiendo..." /> : null}
-                                >
-                                    {messages.map((m, i) => (
-                                        <Message 
-                                            key={i}
-                                            model={{
-                                                message: m.message,
-                                                sentTime: "just now",
-                                                sender: m.sender,
-                                                direction: m.direction,
-                                                position: "normal"
-                                            }}
-                                            className={m.sender === "bot" ? "bot-message" : "user-message"}
+                            <div className="chat-area">
+                                <MainContainer className="main-chat-container">
+                                    <ChatContainer className="chat-container-inner">
+                                        <MessageList
+                                            typingIndicator={isLoading ? <TypingIndicator content="El bot está escribiendo..." /> : null}
+                                        >
+                                            {messages.map((m, i) => (
+                                                <Message 
+                                                    key={i}
+                                                    model={{
+                                                        message: m.message,
+                                                        sentTime: "just now",
+                                                        sender: m.sender,
+                                                        direction: m.direction,
+                                                        position: "normal"
+                                                    }}
+                                                    className={m.sender === "bot" ? "bot-message" : "user-message"}
+                                                />
+                                            ))}
+                                        </MessageList>
+                                        <MessageInput 
+                                            placeholder={selectedLaws.length === 0 
+                                                ? "Selecciona al menos un proyecto de ley para comenzar..." 
+                                                : "Escribe tu pregunta aquí..."
+                                            }
+                                            onSend={handleSend}
+                                            attachButton={false}
+                                            disabled={selectedLaws.length === 0}
                                         />
-                                    ))}
-                                </MessageList>
-                                <MessageInput 
-                                    placeholder={selectedLaws.length === 0 
-                                        ? "Selecciona al menos un proyecto de ley para comenzar..." 
-                                        : "Escribe tu pregunta aquí..."
-                                    }
-                                    onSend={handleSend}
-                                    attachButton={false}
-                                    disabled={selectedLaws.length === 0}
-                                />
-                            </ChatContainer>
+                                    </ChatContainer>
+                                </MainContainer>
+                            </div>
                         </div>
                     )}
                 </div>
